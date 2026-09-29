@@ -1,0 +1,396 @@
+:root {
+    color-scheme: light;
+    --bg: #f3efe6;
+    --paper: #fffdf8;
+    --ink: #1c1915;
+    --muted: #5f584e;
+    --line: #e3d9c8;
+    --accent: #1f6b4a;
+    --accent-ink: #f4fff8;
+    --danger: #8d2f2f;
+    --danger-bg: #fdecec;
+    --ok: #1f6b4a;
+    --ok-bg: #e7f6ee;
+    --warn: #8a5a12;
+    --warn-bg: #fff4df;
+    --shadow: 0 1px 2px rgb(28 25 21 / 6%);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    line-height: 1.45;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.shell {
+    width: min(980px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 64px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-end;
+    margin-bottom: 28px;
+}
+
+.brand {
+    display: grid;
+    gap: 4px;
+}
+
+.brand strong {
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+}
+
+.brand span,
+.lede,
+.empty,
+.meta {
+    color: var(--muted);
+}
+
+.nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nav a {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 0.92rem;
+}
+
+.nav a[aria-current="page"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+}
+
+.panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+.stack {
+    display: grid;
+    gap: 16px;
+}
+
+.page-heading {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.page-heading h1,
+.panel h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+}
+
+form {
+    display: grid;
+    gap: 12px;
+}
+
+label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.92rem;
+}
+
+input,
+select,
+button {
+    font: inherit;
+}
+
+input,
+select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--ink);
+}
+
+button {
+    justify-self: start;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.form-error,
+.form-success {
+    margin: 0;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.form-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.form-success {
+    background: var(--ok-bg);
+    color: var(--ok);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+th {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.82rem;
+}
+
+.badge-pending {
+    background: var(--warn-bg);
+    color: var(--warn);
+}
+
+.badge-reminded {
+    background: var(--ok-bg);
+    color: var(--ok);
+}
+
+.failure {
+    display: block;
+    margin-top: 4px;
+    color: var(--danger);
+    font-size: 0.85rem;
+}
+
+.empty {
+    margin: 0;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+}
+
+/* Lado recolhido da entrada: 10% da largura. O outro fica com 90%. */
+.split {
+    --split-collapsed: 10%;
+    --split-expanded: 90%;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.split-panel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 50%;
+    min-width: 0;
+    overflow: visible;
+    cursor: pointer;
+    transition: flex-basis 0.45s ease;
+}
+
+.split-pet {
+    justify-content: flex-end;
+    background: #f4e6d4;
+    color: #3a2a22;
+}
+
+.split-person {
+    justify-content: flex-start;
+    background: #d7ebe3;
+    color: #163828;
+}
+
+.split-pet-active .split-pet,
+.split-person-active .split-person {
+    flex: 0 0 var(--split-expanded);
+}
+
+.split-pet-active .split-person,
+.split-person-active .split-pet {
+    flex: 0 0 var(--split-collapsed);
+}
+
+.split-figure {
+    width: min(46vh, 280px);
+    height: auto;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+.split-pet .split-figure {
+    margin-right: -36px;
+}
+
+.split-person .split-figure {
+    margin-left: -28px;
+    position: relative;
+    z-index: 1;
+}
+
+.split-pet-active .split-pet .split-figure,
+.split-person-active .split-person .split-figure {
+    width: min(36vh, 220px);
+}
+
+.split-menu {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    gap: 10px;
+    width: min(280px, 34%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%);
+    transition: opacity 0.25s ease;
+}
+
+.split-pet .split-menu {
+    left: 7%;
+}
+
+.split-person .split-menu {
+    right: 7%;
+}
+
+.split-pet-active .split-pet .split-menu,
+.split-person-active .split-person .split-menu {
+    opacity: 1;
+    visibility: visible;
+}
+
+.split-kicker {
+    margin: 0 0 4px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.split-menu a {
+    display: block;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.split-menu a:hover {
+    background: var(--accent);
+    color: var(--accent-ink);
+}
+
+.split-idle-label {
+    position: absolute;
+    bottom: 28px;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.split-pet .split-idle-label {
+    left: 28px;
+}
+
+.split-person .split-idle-label {
+    right: 28px;
+}
+
+.split-pet-active .split-idle-label,
+.split-person-active .split-idle-label {
+    opacity: 0;
+}
+
+.split-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgb(255 253 248 / 88%);
+    color: var(--muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+    .topbar,
+    .grid-2 {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .split-hint {
+        white-space: normal;
+        width: min(240px, 70%);
+        text-align: center;
+    }
+
+    .split-menu {
+        width: min(220px, 70%);
+    }
+}
+

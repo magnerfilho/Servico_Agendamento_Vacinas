@@ -1,0 +1,558 @@
+{
+  "edges": [
+    {
+      "label": "next",
+      "source": "start",
+      "target": "menu"
+    },
+    {
+      "label": "next",
+      "source": "menu",
+      "target": "wait_menu"
+    },
+    {
+      "label": "next",
+      "source": "wait_menu",
+      "target": "route_menu"
+    },
+    {
+      "label": "register",
+      "source": "route_menu",
+      "target": "ask_subject_kind"
+    },
+    {
+      "label": "upcoming",
+      "source": "route_menu",
+      "target": "load_upcoming"
+    },
+    {
+      "label": "next",
+      "source": "ask_subject_kind",
+      "target": "wait_subject_kind"
+    },
+    {
+      "label": "next",
+      "source": "wait_subject_kind",
+      "target": "route_subject"
+    },
+    {
+      "label": "person",
+      "source": "route_subject",
+      "target": "clear_species"
+    },
+    {
+      "label": "pet",
+      "source": "route_subject",
+      "target": "ask_species"
+    },
+    {
+      "label": "next",
+      "source": "clear_species",
+      "target": "ask_subject_name"
+    },
+    {
+      "label": "next",
+      "source": "ask_species",
+      "target": "wait_species"
+    },
+    {
+      "label": "next",
+      "source": "wait_species",
+      "target": "ask_subject_name"
+    },
+    {
+      "label": "next",
+      "source": "ask_subject_name",
+      "target": "wait_subject_name"
+    },
+    {
+      "label": "next",
+      "source": "wait_subject_name",
+      "target": "ask_item_kind"
+    },
+    {
+      "label": "next",
+      "source": "ask_item_kind",
+      "target": "wait_item_kind"
+    },
+    {
+      "label": "next",
+      "source": "wait_item_kind",
+      "target": "ask_item_name"
+    },
+    {
+      "label": "next",
+      "source": "ask_item_name",
+      "target": "wait_item_name"
+    },
+    {
+      "label": "next",
+      "source": "wait_item_name",
+      "target": "ask_due_date"
+    },
+    {
+      "label": "next",
+      "source": "ask_due_date",
+      "target": "wait_due_date"
+    },
+    {
+      "label": "next",
+      "source": "wait_due_date",
+      "target": "save_register"
+    },
+    {
+      "label": "next",
+      "source": "save_register",
+      "target": "format_register"
+    },
+    {
+      "label": "next",
+      "source": "format_register",
+      "target": "reply_register"
+    },
+    {
+      "label": "next",
+      "source": "load_upcoming",
+      "target": "format_upcoming"
+    },
+    {
+      "label": "next",
+      "source": "format_upcoming",
+      "target": "reply_upcoming"
+    }
+  ],
+  "nodes": [
+    {
+      "data": {
+        "config": {},
+        "node_type": "start"
+      },
+      "id": "start",
+      "position": {
+        "x": 240,
+        "y": 40
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "body_text": "Olá! Posso cadastrar um lembrete de vacina ou medicamento, ou listar os próximos.",
+          "buttons": [
+            {
+              "id": "register",
+              "title": "Cadastrar"
+            },
+            {
+              "id": "upcoming",
+              "title": "Próximos"
+            }
+          ],
+          "interactive_type": "button",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_interactive"
+      },
+      "id": "menu",
+      "position": {
+        "x": 240,
+        "y": 180
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "menu_choice",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_menu",
+      "position": {
+        "x": 240,
+        "y": 320
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "conditions": [
+            {
+              "description": "Usuário quer cadastrar um lembrete",
+              "label": "register"
+            },
+            {
+              "description": "Usuário quer ver os próximos lembretes",
+              "label": "upcoming"
+            }
+          ],
+          "decision_type": "function",
+          "function_slug": "route-choice"
+        },
+        "node_type": "decide"
+      },
+      "id": "route_menu",
+      "position": {
+        "x": 240,
+        "y": 460
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "body_text": "O lembrete é para uma pessoa ou para um pet?",
+          "buttons": [
+            {
+              "id": "person",
+              "title": "Pessoa"
+            },
+            {
+              "id": "pet",
+              "title": "Pet"
+            }
+          ],
+          "interactive_type": "button",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_interactive"
+      },
+      "id": "ask_subject_kind",
+      "position": {
+        "x": 40,
+        "y": 620
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "subject_kind",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_subject_kind",
+      "position": {
+        "x": 40,
+        "y": 760
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "conditions": [
+            {
+              "description": "O lembrete é para uma pessoa",
+              "label": "person"
+            },
+            {
+              "description": "O lembrete é para um pet",
+              "label": "pet"
+            }
+          ],
+          "decision_type": "function",
+          "function_slug": "route-choice"
+        },
+        "node_type": "decide"
+      },
+      "id": "route_subject",
+      "position": {
+        "x": 40,
+        "y": 900
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "value_type": "string",
+          "variable_name": "species",
+          "variable_value": ""
+        },
+        "node_type": "set_variable"
+      },
+      "id": "clear_species",
+      "position": {
+        "x": 40,
+        "y": 1040
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "Qual a espécie do pet? Por exemplo: cão, gato.",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "ask_species",
+      "position": {
+        "x": 280,
+        "y": 1040
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "species",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_species",
+      "position": {
+        "x": 280,
+        "y": 1180
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "Qual o nome?",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "ask_subject_name",
+      "position": {
+        "x": 160,
+        "y": 1320
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "subject_name",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_subject_name",
+      "position": {
+        "x": 160,
+        "y": 1460
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "body_text": "É vacina ou medicamento?",
+          "buttons": [
+            {
+              "id": "vaccine",
+              "title": "Vacina"
+            },
+            {
+              "id": "medication",
+              "title": "Medicamento"
+            }
+          ],
+          "interactive_type": "button",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_interactive"
+      },
+      "id": "ask_item_kind",
+      "position": {
+        "x": 160,
+        "y": 1600
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "item_kind",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_item_kind",
+      "position": {
+        "x": 160,
+        "y": 1740
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "Qual o nome da vacina ou do medicamento?",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "ask_item_name",
+      "position": {
+        "x": 160,
+        "y": 1880
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "item_name",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_item_name",
+      "position": {
+        "x": 160,
+        "y": 2020
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "Qual a data de vencimento? Responda no formato DD/MM/AAAA.",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "ask_due_date",
+      "position": {
+        "x": 160,
+        "y": 2160
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "has_timeout": true,
+          "save_response_to": "due_date",
+          "timeout_seconds": 600
+        },
+        "node_type": "wait_for_response"
+      },
+      "id": "wait_due_date",
+      "position": {
+        "x": 160,
+        "y": 2300
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "body_template": {
+            "dueDate": "{{vars.due_date}}",
+            "itemKind": "{{vars.item_kind}}",
+            "itemName": "{{vars.item_name}}",
+            "phone": "{{context.phone_number}}",
+            "species": "{{vars.species}}",
+            "subjectKind": "{{vars.subject_kind}}",
+            "subjectName": "{{vars.subject_name}}"
+          },
+          "headers": {},
+          "method": "POST",
+          "save_response_to": "api_result",
+          "url": "http://localhost:3000/api/whatsapp/register"
+        },
+        "node_type": "webhook"
+      },
+      "id": "save_register",
+      "position": {
+        "x": 160,
+        "y": 2440
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "function_slug": "format-api-reply"
+        },
+        "node_type": "function"
+      },
+      "id": "format_register",
+      "position": {
+        "x": 160,
+        "y": 2580
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "{{vars.reply_text}}",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "reply_register",
+      "position": {
+        "x": 160,
+        "y": 2720
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "body_template": {
+            "phone": "{{context.phone_number}}"
+          },
+          "headers": {},
+          "method": "POST",
+          "save_response_to": "api_result",
+          "url": "http://localhost:3000/api/whatsapp/upcoming"
+        },
+        "node_type": "webhook"
+      },
+      "id": "load_upcoming",
+      "position": {
+        "x": 480,
+        "y": 620
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "function_slug": "format-api-reply"
+        },
+        "node_type": "function"
+      },
+      "id": "format_upcoming",
+      "position": {
+        "x": 480,
+        "y": 760
+      },
+      "type": "flow-node"
+    },
+    {
+      "data": {
+        "config": {
+          "message": "{{vars.reply_text}}",
+          "phone_number_id": "1283185134887856"
+        },
+        "node_type": "send_text"
+      },
+      "id": "reply_upcoming",
+      "position": {
+        "x": 480,
+        "y": 900
+      },
+      "type": "flow-node"
+    }
+  ]
+}

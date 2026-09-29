@@ -1,0 +1,14 @@
+{
+  "name": "lembrete_vencimento",
+  "language": "pt_BR",
+  "category": "UTILITY",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Olá. Passando para lembrar que {{1}}, cadastrado para {{2}} ({{3}}), tem vencimento em {{4}}. Vale organizar a aplicação ou a compra antes dessa data para não perder o prazo.",
+      "example": {
+        "body_text": [["Antirrábica", "Luna", "pet", "10/10/2026"]]
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "functions": {
+    "decidir-menu": {
+      "files": {
+        "functions\\decidir-menu\\function.yaml": "c92f0f35bf43bdc93dfa1ee1711139ac1c8653542f4363ae4da96690378090e2",
+        "functions\\decidir-menu\\index.js": "cc6bab4219b5fb35dc2531e2de7c077f907ab70901089df2337c2d024e3cc740"
+      },
+      "id": "87fb2eb8-585e-472d-96b6-efdab1c81443",
+      "lastDeployedAt": "2026-09-28T10:04:29-03:00",
+      "lockVersion": 1,
+      "slug": "decidir-menu",
+      "status": "deployed",
+      "updatedAt": "2026-09-28T10:04:29-03:00"
+    },
+    "format-api-reply": {
+      "files": {
+        "functions\\format-api-reply\\function.yaml": "7f62ef56e73750254e08879b3d18be465188f2467c830badfb85be128f291739",
+        "functions\\format-api-reply\\index.js": "821802869b64ce049031c00f636a38da3373d8f1515064188510198bce61ad32"
+      },
+      "id": "ceda775d-18de-4795-9e49-bebf36d4e73b",
+      "lastDeployedAt": "2026-09-28T15:24:32-03:00",
+      "lockVersion": 1,
+      "slug": "format-api-reply",
+      "status": "deployed",
+      "updatedAt": "2026-09-28T15:24:32-03:00"
+    },
+    "route-choice": {
+      "files": {
+        "functions\\route-choice\\function.yaml": "67a58cebc040e7ac28fd1ba7801c263c86eb4d3335351446a07bd76f3266c59f",
+        "functions\\route-choice\\index.js": "921a1d47b75a7e7813f10f2c354233b90bf291549beadf7fb40eb39a9c3a8577"
+      },
+      "id": "83dfd196-1611-4780-bb97-01f44de197c7",
+      "lastDeployedAt": "2026-09-28T15:24:26-03:00",
+      "lockVersion": 1,
+      "slug": "route-choice",
+      "status": "deployed",
+      "updatedAt": "2026-09-28T15:24:26-03:00"
+    }
+  },
+  "version": 1,
+  "workflows": {
+    "atendimento-bot": {
+      "files": {
+        "workflows\\atendimento-bot\\definition.json": "15f747fcb83ab22db729adb94580e0b6cfbaf37a43c42ad93ed772ebf501ba1c",
+        "workflows\\atendimento-bot\\workflow.yaml": "bbc25efd6568fb028ee70871729c539f6de511b865facf4e12ed2e6534b5d499"
+      },
+      "generatedSource": {
+        "hash": "807afe8c392c6c578ca6a15b129c9a753c1aa611e6b15fe7e8043c6bdd959d32",
+        "path": "workflows\\atendimento-bot\\workflow.js"
+      },
+      "id": "7d3e03e1-097a-488e-a93b-9b4a5a57e892",
+      "lockVersion": 7,
+      "slug": "atendimento-bot",
+      "sourceFile": {
+        "hash": "c246ba52ba1a797e2cd573e5ed22379b515973d8ba6ceaeaaf5f29e3e844c2a8",
+        "path": "workflows\\atendimento-bot\\workflow.js"
+      },
+      "status": "active",
+      "updatedAt": "2026-09-28T15:24:03-03:00"
+    },
+    "lembretes": {
+      "files": {
+        "workflows\\lembretes\\definition.json": "67ea9abe142346ca4e3892aeba071160cfa1e07c416e5dbf6068bd45dc883732",
+        "workflows\\lembretes\\workflow.yaml": "d981558e6ee52481502c941ad35297f419fc53cda8ef0eead586c79931c814b9"
+      },
+      "id": "00c0e98a-9d2c-4a13-87c0-b027e5668d27",
+      "lockVersion": 2,
+      "slug": "lembretes",
+      "sourceFile": {
+        "hash": "fddef378a942ba55f8cb6e99d73d710562231d957bb8b4860e65c0bdd3863664",
+        "path": "workflows\\lembretes\\workflow.js"
+      },
+      "status": "draft",
+      "updatedAt": "2026-09-28T15:24:38-03:00"
+    }
+  }
+}
