@@ -27,7 +27,20 @@ export const careItems = sqliteTable('care_items', {
     name: text('name').notNull(),
     dueDate: text('due_date').notNull(),
     remindDaysBefore: integer('remind_days_before').notNull(),
+    remindTime: text('remind_time').notNull(),
     status: text('status').notNull(),
+    createdAt: text('created_at').notNull(),
+});
+
+export const loginCodes = sqliteTable('login_codes', {
+    id: text('id').primaryKey(),
+    guardianId: text('guardian_id')
+        .notNull()
+        .references(() => guardians.id),
+    codeHash: text('code_hash').notNull(),
+    expiresAt: text('expires_at').notNull(),
+    attempts: integer('attempts').notNull(),
+    consumedAt: text('consumed_at'),
     createdAt: text('created_at').notNull(),
 });
 

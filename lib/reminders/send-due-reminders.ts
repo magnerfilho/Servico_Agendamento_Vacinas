@@ -1,5 +1,5 @@
 import { findLatestLog, insertReminderLog, listCareItems, markCareItemReminded } from '@/lib/db/queries';
-import { formatDateBr, subtractDays, todayInAppTimeZone } from '@/lib/dates';
+import { currentTimeInAppTimeZone, formatDateBr, subtractDays, todayInAppTimeZone } from '@/lib/dates';
 import {
     createWhatsAppClient,
     getPhoneNumberId,
@@ -25,13 +25,19 @@ export async function sendDueReminders(): Promise<SendRemindersResult> {
 
     try {
         const today = todayInAppTimeZone();
+        const currentTime = currentTimeInAppTimeZone();
         const dueItems = (await listCareItems()).filter((item) => {
             if (item.status !== 'pending') {
                 return false;
             }
 
             const alertDate = subtractDays({ isoDate: item.dueDate, days: item.remindDaysBefore });
-            return alertDate <= today;
+            return isReminderDue({
+                alertDate,
+                remindTime: item.remindTime,
+                today,
+                currentTime,
+            });
         });
 
         let sent = 0;
@@ -123,6 +129,28 @@ async function recordError({
     });
 
     return true;
+}
+
+function isReminderDue({
+    alertDate,
+    remindTime,
+    today,
+    currentTime,
+}: {
+    alertDate: string;
+    remindTime: string;
+    today: string;
+    currentTime: string;
+}): boolean {
+    if (alertDate < today) {
+        return true;
+    }
+
+    if (alertDate > today) {
+        return false;
+    }
+
+    return remindTime <= currentTime;
 }
 
 export function describePendingFailure(errorMessage: string | null): string {

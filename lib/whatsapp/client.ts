@@ -1,4 +1,6 @@
 import {
+    LOGIN_TEMPLATE_LANGUAGE,
+    LOGIN_TEMPLATE_NAME,
     REMINDER_TEMPLATE_LANGUAGE,
     REMINDER_TEMPLATE_NAME,
     WHATSAPP_PHONE_NUMBER_ID,
@@ -30,6 +32,14 @@ export function getReminderTemplateName(): string {
 
 export function getReminderTemplateLanguage(): string {
     return process.env.WHATSAPP_TEMPLATE_LANGUAGE || REMINDER_TEMPLATE_LANGUAGE;
+}
+
+export function getLoginTemplateName(): string {
+    return process.env.WHATSAPP_LOGIN_TEMPLATE_NAME || LOGIN_TEMPLATE_NAME;
+}
+
+export function getLoginTemplateLanguage(): string {
+    return process.env.WHATSAPP_LOGIN_TEMPLATE_LANGUAGE || LOGIN_TEMPLATE_LANGUAGE;
 }
 
 export function subjectKindInMessage(kind: SubjectKind): string {

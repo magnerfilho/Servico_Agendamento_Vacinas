@@ -7,6 +7,32 @@ export function todayInAppTimeZone(now: Date = new Date()): string {
     return new Intl.DateTimeFormat('en-CA', { timeZone: APP_TIME_ZONE }).format(now);
 }
 
+const CLOCK_PART_FALLBACK = '00';
+
+export function currentTimeInAppTimeZone(now: Date = new Date()): string {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: APP_TIME_ZONE,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    }).formatToParts(now);
+    const hour = parts.find((part) => part.type === 'hour')?.value ?? CLOCK_PART_FALLBACK;
+    const minute = parts.find((part) => part.type === 'minute')?.value ?? CLOCK_PART_FALLBACK;
+
+    return `${hour}:${minute}`;
+}
+
+const REMIND_TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/;
+
+export function parseRemindTime(value: string): string | null {
+    const match = REMIND_TIME_PATTERN.exec(value.trim());
+    if (!match?.[1] || !match[2]) {
+        return null;
+    }
+
+    return `${match[1]}:${match[2]}`;
+}
+
 export function formatDateBr(isoDate: string): string {
     const [year, month, day] = isoDate.split('-');
     if (!year || !month || !day) {

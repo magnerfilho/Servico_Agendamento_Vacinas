@@ -1,4 +1,10 @@
-import { DEFAULT_GUARDIAN_NAME, DEFAULT_REMIND_DAYS_BEFORE, MAX_REMIND_DAYS_BEFORE, MAX_UPCOMING_ITEMS } from '@/lib/constants';
+import {
+    DEFAULT_GUARDIAN_NAME,
+    DEFAULT_REMIND_DAYS_BEFORE,
+    DEFAULT_REMIND_TIME,
+    MAX_REMIND_DAYS_BEFORE,
+    MAX_UPCOMING_ITEMS,
+} from '@/lib/constants';
 import {
     findGuardianByPhone,
     findSubjectByIdentity,
@@ -80,11 +86,17 @@ export async function registerFromWhatsApp(body: unknown): Promise<{ ok: boolean
         name: itemName,
         dueDate,
         remindDaysBefore: DEFAULT_REMIND_DAYS_BEFORE,
+        remindTime: DEFAULT_REMIND_TIME,
+    });
+
+    const reminder = remindSentence({
+        days: DEFAULT_REMIND_DAYS_BEFORE,
+        remindTime: DEFAULT_REMIND_TIME,
     });
 
     return {
         ok: true,
-        message: `Pronto. Cadastrei ${itemName} de ${subjectName}, com vencimento em ${formatDateBr(dueDate)}. ${remindSentence(DEFAULT_REMIND_DAYS_BEFORE)}`,
+        message: `Pronto. Cadastrei ${itemName} de ${subjectName}, com vencimento em ${formatDateBr(dueDate)}. ${reminder}`,
     };
 }
 
@@ -125,16 +137,16 @@ export function validateRemindDays(value: number): string | null {
     return null;
 }
 
-export function remindSentence(days: number): string {
+export function remindSentence({ days, remindTime }: { days: number; remindTime: string }): string {
     if (days === 0) {
-        return 'O lembrete sai no dia do vencimento.';
+        return `O lembrete sai no dia do vencimento, às ${remindTime}.`;
     }
 
     if (days === 1) {
-        return 'O lembrete sai 1 dia antes.';
+        return `O lembrete sai 1 dia antes, às ${remindTime}.`;
     }
 
-    return `O lembrete sai ${days} dias antes.`;
+    return `O lembrete sai ${days} dias antes, às ${remindTime}.`;
 }
 
 function formatUpcomingLine(item: CareItemRecord): string {

@@ -1,4 +1,4 @@
-import { asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm';
 import {
     careItemKinds,
     careItemStatuses,
@@ -10,7 +10,7 @@ import {
     type SubjectKind,
 } from '@/lib/constants';
 import { getDatabase } from '@/lib/db/client';
-import { careItems, guardians, reminderLogs, subjects } from '@/lib/db/schema';
+import { careItems, guardians, loginCodes, reminderLogs, subjects } from '@/lib/db/schema';
 
 export interface GuardianRecord {
     id: string;
@@ -41,7 +41,18 @@ export interface CareItemRecord {
     name: string;
     dueDate: string;
     remindDaysBefore: number;
+    remindTime: string;
     status: CareItemStatus;
+}
+
+export interface LoginCodeRecord {
+    id: string;
+    guardianId: string;
+    codeHash: string;
+    expiresAt: string;
+    attempts: number;
+    consumedAt: string | null;
+    createdAt: string;
 }
 
 export interface ReminderLogRecord {
@@ -53,9 +64,12 @@ export interface ReminderLogRecord {
     errorMessage: string | null;
 }
 
-export async function listGuardians(): Promise<GuardianRecord[]> {
+export async function listGuardians(guardianId?: string): Promise<GuardianRecord[]> {
     const database = await getDatabase();
-    const rows = await database.select().from(guardians).orderBy(asc(guardians.name));
+    const selection = database.select().from(guardians);
+    const rows = await (guardianId ? selection.where(eq(guardians.id, guardianId)) : selection).orderBy(
+        asc(guardians.name),
+    );
     return rows;
 }
 
@@ -67,6 +81,12 @@ export async function findGuardianByPhone(whatsappNumber: string): Promise<Guard
         .where(eq(guardians.whatsappNumber, whatsappNumber))
         .limit(1);
 
+    return rows[0] ?? null;
+}
+
+export async function findGuardianById(id: string): Promise<GuardianRecord | null> {
+    const database = await getDatabase();
+    const rows = await database.select().from(guardians).where(eq(guardians.id, id)).limit(1);
     return rows[0] ?? null;
 }
 
@@ -89,9 +109,9 @@ export async function insertGuardian({
     return record;
 }
 
-export async function listSubjects(): Promise<SubjectRecord[]> {
+export async function listSubjects(guardianId?: string): Promise<SubjectRecord[]> {
     const database = await getDatabase();
-    const rows = await database
+    const selection = database
         .select({
             id: subjects.id,
             guardianId: subjects.guardianId,
@@ -102,8 +122,12 @@ export async function listSubjects(): Promise<SubjectRecord[]> {
             createdAt: subjects.createdAt,
         })
         .from(subjects)
-        .innerJoin(guardians, eq(subjects.guardianId, guardians.id))
-        .orderBy(asc(guardians.name), asc(subjects.name));
+        .innerJoin(guardians, eq(subjects.guardianId, guardians.id));
+
+    const rows = await (guardianId ? selection.where(eq(subjects.guardianId, guardianId)) : selection).orderBy(
+        asc(guardians.name),
+        asc(subjects.name),
+    );
 
     return rows.flatMap((row) => {
         const kind = asSubjectKind(row.kind);
@@ -163,9 +187,42 @@ export async function insertSubject({
     return id;
 }
 
-export async function listCareItems(): Promise<CareItemRecord[]> {
+export async function deleteSubjectForGuardian({
+    subjectId,
+    guardianId,
+}: {
+    subjectId: string;
+    guardianId: string;
+}): Promise<boolean> {
     const database = await getDatabase();
-    const rows = await database
+    const owned = await database
+        .select({ id: subjects.id })
+        .from(subjects)
+        .where(and(eq(subjects.id, subjectId), eq(subjects.guardianId, guardianId)))
+        .limit(1);
+
+    if (!owned[0]) {
+        return false;
+    }
+
+    const items = await database
+        .select({ id: careItems.id })
+        .from(careItems)
+        .where(eq(careItems.subjectId, subjectId));
+    const careItemIds = items.map((item) => item.id);
+
+    if (careItemIds.length > 0) {
+        await database.delete(reminderLogs).where(inArray(reminderLogs.careItemId, careItemIds));
+        await database.delete(careItems).where(eq(careItems.subjectId, subjectId));
+    }
+
+    await database.delete(subjects).where(eq(subjects.id, subjectId));
+    return true;
+}
+
+export async function listCareItems(guardianId?: string): Promise<CareItemRecord[]> {
+    const database = await getDatabase();
+    const selection = database
         .select({
             id: careItems.id,
             subjectId: careItems.subjectId,
@@ -178,12 +235,17 @@ export async function listCareItems(): Promise<CareItemRecord[]> {
             name: careItems.name,
             dueDate: careItems.dueDate,
             remindDaysBefore: careItems.remindDaysBefore,
+            remindTime: careItems.remindTime,
             status: careItems.status,
         })
         .from(careItems)
         .innerJoin(subjects, eq(careItems.subjectId, subjects.id))
-        .innerJoin(guardians, eq(subjects.guardianId, guardians.id))
-        .orderBy(asc(careItems.dueDate), asc(subjects.name));
+        .innerJoin(guardians, eq(subjects.guardianId, guardians.id));
+
+    const rows = await (guardianId ? selection.where(eq(subjects.guardianId, guardianId)) : selection).orderBy(
+        asc(careItems.dueDate),
+        asc(subjects.name),
+    );
 
     return rows.flatMap((row) => {
         const subjectKind = asSubjectKind(row.subjectKind);
@@ -204,12 +266,14 @@ export async function insertCareItem({
     name,
     dueDate,
     remindDaysBefore,
+    remindTime,
 }: {
     subjectId: string;
     kind: CareItemKind;
     name: string;
     dueDate: string;
     remindDaysBefore: number;
+    remindTime: string;
 }): Promise<string> {
     const database = await getDatabase();
     const id = crypto.randomUUID();
@@ -221,6 +285,7 @@ export async function insertCareItem({
         name,
         dueDate,
         remindDaysBefore,
+        remindTime,
         status: 'pending',
         createdAt: new Date().toISOString(),
     });
@@ -285,6 +350,85 @@ export async function insertReminderLog({
         outcome,
         errorMessage,
     });
+}
+
+export async function findLatestLoginCode(guardianId: string): Promise<LoginCodeRecord | null> {
+    const database = await getDatabase();
+    const rows = await database
+        .select()
+        .from(loginCodes)
+        .where(eq(loginCodes.guardianId, guardianId))
+        .orderBy(desc(loginCodes.createdAt))
+        .limit(1);
+
+    return rows[0] ?? null;
+}
+
+export async function findActiveLoginCode(guardianId: string): Promise<LoginCodeRecord | null> {
+    const database = await getDatabase();
+    const rows = await database
+        .select()
+        .from(loginCodes)
+        .where(and(eq(loginCodes.guardianId, guardianId), isNull(loginCodes.consumedAt)))
+        .orderBy(desc(loginCodes.createdAt))
+        .limit(1);
+
+    return rows[0] ?? null;
+}
+
+export async function insertLoginCode({
+    guardianId,
+    codeHash,
+    expiresAt,
+}: {
+    guardianId: string;
+    codeHash: string;
+    expiresAt: string;
+}): Promise<LoginCodeRecord> {
+    const database = await getDatabase();
+    const record: LoginCodeRecord = {
+        id: crypto.randomUUID(),
+        guardianId,
+        codeHash,
+        expiresAt,
+        attempts: 0,
+        consumedAt: null,
+        createdAt: new Date().toISOString(),
+    };
+
+    await database.insert(loginCodes).values(record);
+    return record;
+}
+
+export async function invalidateActiveLoginCodes(guardianId: string): Promise<void> {
+    const database = await getDatabase();
+    await database
+        .update(loginCodes)
+        .set({ consumedAt: new Date().toISOString() })
+        .where(and(eq(loginCodes.guardianId, guardianId), isNull(loginCodes.consumedAt)));
+}
+
+export async function registerFailedLoginAttempt({
+    id,
+    attempts,
+    consumedAt,
+}: {
+    id: string;
+    attempts: number;
+    consumedAt: string | null;
+}): Promise<void> {
+    const database = await getDatabase();
+    await database.update(loginCodes).set({ attempts, consumedAt }).where(eq(loginCodes.id, id));
+}
+
+export async function consumeLoginCode(id: string): Promise<void> {
+    const database = await getDatabase();
+    await database.update(loginCodes).set({ consumedAt: new Date().toISOString() }).where(eq(loginCodes.id, id));
+}
+
+export async function deleteLoginCode(id: string): Promise<void> {
+    const database = await getDatabase();
+    await database.delete(loginCodes).where(eq(loginCodes.id, id));
 }
 
 function asSubjectKind(value: string): SubjectKind | null {

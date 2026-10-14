@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { createClient, type Client } from '@libsql/client';
 import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
+import { DEFAULT_REMIND_TIME } from '@/lib/constants';
 import * as schema from '@/lib/db/schema';
 
 export type AppDatabase = LibSQLDatabase<typeof schema>;
@@ -57,7 +58,22 @@ async function initializeSchema(client: Client): Promise<void> {
             name TEXT NOT NULL,
             due_date TEXT NOT NULL,
             remind_days_before INTEGER NOT NULL,
+            remind_time TEXT NOT NULL,
             status TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    `);
+
+    await ensureRemindTimeColumn(client);
+
+    await client.execute(`
+        CREATE TABLE IF NOT EXISTS login_codes (
+            id TEXT PRIMARY KEY,
+            guardian_id TEXT NOT NULL REFERENCES guardians(id),
+            code_hash TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            attempts INTEGER NOT NULL,
+            consumed_at TEXT,
             created_at TEXT NOT NULL
         )
     `);
@@ -72,4 +88,17 @@ async function initializeSchema(client: Client): Promise<void> {
             error_message TEXT
         )
     `);
+}
+
+async function ensureRemindTimeColumn(client: Client): Promise<void> {
+    const info = await client.execute('PRAGMA table_info(care_items)');
+    const hasRemindTime = info.rows.some((row) => String(row.name) === 'remind_time');
+
+    if (hasRemindTime) {
+        return;
+    }
+
+    await client.execute(
+        `ALTER TABLE care_items ADD COLUMN remind_time TEXT NOT NULL DEFAULT '${DEFAULT_REMIND_TIME}'`,
+    );
 }

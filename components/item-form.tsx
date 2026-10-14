@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import type { ReactElement } from 'react';
 import { createCareItem } from '@/lib/actions/items';
 import { emptyFormState } from '@/lib/actions/form-state';
-import { DEFAULT_REMIND_DAYS_BEFORE } from '@/lib/constants';
+import { DEFAULT_REMIND_DAYS_BEFORE, DEFAULT_REMIND_TIME, type SubjectKind } from '@/lib/constants';
 import { FormNotice } from '@/components/form-notice';
 import { SubmitButton } from '@/components/submit-button';
 
@@ -13,15 +13,24 @@ interface SubjectOption {
     label: string;
 }
 
-export function ItemForm({ subjects }: { subjects: SubjectOption[] }): ReactElement {
+export function ItemForm({
+    subjects,
+    audience,
+    selectedSubjectId,
+}: {
+    subjects: SubjectOption[];
+    audience: SubjectKind | null;
+    selectedSubjectId: string | null;
+}): ReactElement {
     const [state, action] = useActionState(createCareItem, emptyFormState);
+    const chosen = subjects.some((subject) => subject.id === selectedSubjectId) ? selectedSubjectId : '';
 
     return (
-        <form key={state.savedAt ?? 'new'} action={action}>
+        <form key={`${state.savedAt ?? 'new'}-${chosen || 'none'}`} action={action}>
             <FormNotice state={state} />
             <label>
-                Pessoa ou pet
-                <select name="subjectId" required defaultValue="">
+                {subjectFieldLabel(audience)}
+                <select name="subjectId" required defaultValue={chosen ?? ''}>
                     <option value="" disabled>
                         Escolha
                     </option>
@@ -57,7 +66,23 @@ export function ItemForm({ subjects }: { subjects: SubjectOption[] }): ReactElem
                     required
                 />
             </label>
+            <label>
+                Horário do alerta
+                <input name="remindTime" type="time" defaultValue={DEFAULT_REMIND_TIME} required />
+            </label>
             <SubmitButton label="Salvar lembrete" />
         </form>
     );
+}
+
+function subjectFieldLabel(audience: SubjectKind | null): string {
+    if (audience === 'pet') {
+        return 'Pet já cadastrado';
+    }
+
+    if (audience === 'person') {
+        return 'Pessoa já cadastrada';
+    }
+
+    return 'Pessoa ou pet já cadastrado';
 }

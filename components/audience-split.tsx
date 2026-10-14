@@ -3,24 +3,14 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
 import Link from 'next/link';
+import { loginPath } from '@/lib/auth/paths';
+import { withAudience } from '@/lib/audience';
 import type { SubjectKind } from '@/lib/constants';
 import { DogFigure, PersonFigure } from '@/components/split-figures';
 
 type Side = SubjectKind;
 
-const PET_LINKS = [
-    { href: '/upcoming?audience=pet', label: 'Próximos vencimentos' },
-    { href: '/guardians?audience=pet', label: 'Responsáveis' },
-    { href: '/subjects?audience=pet', label: 'Pets' },
-    { href: '/items?audience=pet', label: 'Vacinas e medicamentos' },
-];
-
-const PERSON_LINKS = [
-    { href: '/upcoming?audience=person', label: 'Próximos vencimentos' },
-    { href: '/guardians?audience=person', label: 'Responsáveis' },
-    { href: '/subjects?audience=person', label: 'Pessoas' },
-    { href: '/items?audience=person', label: 'Vacinas e medicamentos' },
-];
+const SPLIT_LINE = 'Não deixe a saúde de quem importa de lado.';
 
 export function AudienceSplit(): ReactElement {
     const [hovered, setHovered] = useState<Side | null>(null);
@@ -39,14 +29,7 @@ export function AudienceSplit(): ReactElement {
                 onMouseEnter={() => setHovered('pet')}
                 onClick={() => lockSide('pet')}
             >
-                <nav className="split-menu" aria-label="Opções para pets" onClick={(event) => event.stopPropagation()}>
-                    <p className="split-kicker">Pets</p>
-                    {PET_LINKS.map((link) => (
-                        <Link key={link.href} href={link.href}>
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
+                <SplitOffer audience="pet" label="Prosseguir para pets" />
                 <DogFigure />
                 <p className="split-idle-label">Pets</p>
             </section>
@@ -56,19 +39,25 @@ export function AudienceSplit(): ReactElement {
                 onClick={() => lockSide('person')}
             >
                 <PersonFigure />
-                <nav className="split-menu" aria-label="Opções para pessoas" onClick={(event) => event.stopPropagation()}>
-                    <p className="split-kicker">Pessoas</p>
-                    {PERSON_LINKS.map((link) => (
-                        <Link key={link.href} href={link.href}>
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
+                <SplitOffer audience="person" label="Prosseguir para pessoas" />
                 <p className="split-idle-label">Pessoas</p>
             </section>
             <p className="split-hint">
-                {locked ? 'Clique de novo no lado aberto para voltar.' : 'Passe o mouse para ampliar. Clique para fixar.'}
+                {locked ? 'Toque de novo no lado aberto para voltar.' : 'Passe o mouse ou toque para ampliar.'}
             </p>
+        </div>
+    );
+}
+
+function SplitOffer({ audience, label }: { audience: SubjectKind; label: string }): ReactElement {
+    const href = loginPath(withAudience({ path: '/upcoming', audience }));
+
+    return (
+        <div className="split-offer">
+            <p className="split-line">{SPLIT_LINE}</p>
+            <Link className="split-proceed" href={href} onClick={(event) => event.stopPropagation()}>
+                {label}
+            </Link>
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { requireGuardian } from '@/lib/auth/require-guardian';
 import { listCareItems, listLatestLogs } from '@/lib/db/queries';
 import { formatDateBr, subtractDays } from '@/lib/dates';
 import { careItemKindLabel, careItemStatusLabel, subjectKindLabel } from '@/lib/labels';
@@ -11,7 +12,8 @@ export default async function UpcomingPage({
     searchParams: Promise<{ audience?: string }>;
 }): Promise<ReactElement> {
     const audience = parseAudience((await searchParams).audience);
-    const items = (await listCareItems()).filter((item) => !audience || item.subjectKind === audience);
+    const guardian = await requireGuardian({ path: '/upcoming', audience });
+    const items = (await listCareItems(guardian.id)).filter((item) => !audience || item.subjectKind === audience);
     const logs = await listLatestLogs(items.map((item) => item.id));
     const scope = audience ? audienceLabel(audience).toLocaleLowerCase('pt-BR') : null;
 
@@ -20,9 +22,8 @@ export default async function UpcomingPage({
             <div className="page-heading">
                 <h1>{scope ? `Próximos vencimentos de ${scope}` : 'Próximos vencimentos'}</h1>
                 <p className="lede">
-                    Os dados ficam neste computador: nome, WhatsApp e datas. O lembrete sai pelo WhatsApp na data do
-                    alerta. Se o template da Meta ainda não foi aprovado, o item continua pendente e o erro aparece
-                    aqui.
+                    O lembrete sai pelo WhatsApp na data do alerta. Se o template da Meta ainda não foi aprovado, o item
+                    continua pendente e o erro aparece aqui.
                 </p>
             </div>
             <section className="panel">
@@ -65,7 +66,10 @@ export default async function UpcomingPage({
                                                 <span className="meta"> · {careItemKindLabel(item.kind)}</span>
                                             </td>
                                             <td>{formatDateBr(item.dueDate)}</td>
-                                            <td>{formatDateBr(alertDate)}</td>
+                                            <td>
+                                                {formatDateBr(alertDate)}
+                                                <span className="meta"> · {item.remindTime}</span>
+                                            </td>
                                             <td>
                                                 <span
                                                     className={

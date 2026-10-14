@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { ItemForm } from '@/components/item-form';
+import { requireGuardian } from '@/lib/auth/require-guardian';
 import { listCareItems, listSubjects } from '@/lib/db/queries';
 import { formatDateBr } from '@/lib/dates';
 import { careItemKindLabel, subjectKindLabel } from '@/lib/labels';
@@ -9,11 +10,17 @@ import { audienceLabel, parseAudience } from '@/lib/audience';
 export default async function ItemsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ audience?: string }>;
+    searchParams: Promise<{ audience?: string; subject?: string }>;
 }): Promise<ReactElement> {
-    const audience = parseAudience((await searchParams).audience);
-    const [allSubjects, allItems] = await Promise.all([listSubjects(), listCareItems()]);
+    const params = await searchParams;
+    const audience = parseAudience(params.audience);
+    const guardian = await requireGuardian({ path: '/items', audience });
+    const [allSubjects, allItems] = await Promise.all([
+        listSubjects(guardian.id),
+        listCareItems(guardian.id),
+    ]);
     const subjects = allSubjects.filter((subject) => !audience || subject.kind === audience);
+    const selectedSubjectId = subjects.some((subject) => subject.id === params.subject) ? (params.subject ?? null) : null;
     const items = allItems.filter((item) => !audience || item.subjectKind === audience);
     const scope = audience ? audienceLabel(audience).toLocaleLowerCase('pt-BR') : null;
 
@@ -51,7 +58,10 @@ export default async function ItemsPage({
                                             </td>
                                             <td>
                                                 {formatDateBr(item.dueDate)}
-                                                <span className="meta"> · {remindSentence(item.remindDaysBefore)}</span>
+                                                <span className="meta">
+                                                    {' '}
+                                                    · {remindSentence({ days: item.remindDaysBefore, remindTime: item.remindTime })}
+                                                </span>
                                             </td>
                                         </tr>
                                     ))}
@@ -72,9 +82,11 @@ export default async function ItemsPage({
                         </p>
                     ) : (
                         <ItemForm
+                            audience={audience}
+                            selectedSubjectId={selectedSubjectId}
                             subjects={subjects.map((subject) => ({
                                 id: subject.id,
-                                label: `${subject.name} (${subjectKindLabel(subject.kind)}) — ${subject.guardianName}`,
+                                label: `${subject.name} (${subjectKindLabel(subject.kind)})`,
                             }))}
                         />
                     )}

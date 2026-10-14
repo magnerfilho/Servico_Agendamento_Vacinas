@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import type { ReactElement } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { logout } from '@/lib/actions/login';
 import { audienceLabel, parseAudience, withAudience } from '@/lib/audience';
 
 export function SiteHeader(): ReactElement {
@@ -42,6 +43,13 @@ function SiteHeaderNav(): ReactElement {
                         </Link>
                     );
                 })}
+                {pathname === '/entrar' ? null : (
+                    <form action={logout}>
+                        <button className="linkish" type="submit">
+                            Sair
+                        </button>
+                    </form>
+                )}
             </nav>
         </header>
     );

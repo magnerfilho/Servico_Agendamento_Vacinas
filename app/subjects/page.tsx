@@ -1,7 +1,11 @@
 import type { ReactElement } from 'react';
+import Link from 'next/link';
+import { DeleteSubjectButton } from '@/components/delete-subject-button';
 import { SubjectForm } from '@/components/subject-form';
-import { audienceLabel, parseAudience } from '@/lib/audience';
-import { listGuardians, listSubjects } from '@/lib/db/queries';
+import { requireGuardian } from '@/lib/auth/require-guardian';
+import { audienceLabel, parseAudience, withAudience } from '@/lib/audience';
+import type { SubjectKind } from '@/lib/constants';
+import { listSubjects } from '@/lib/db/queries';
 import { subjectKindLabel } from '@/lib/labels';
 
 export default async function SubjectsPage({
@@ -10,8 +14,8 @@ export default async function SubjectsPage({
     searchParams: Promise<{ audience?: string }>;
 }): Promise<ReactElement> {
     const audience = parseAudience((await searchParams).audience);
-    const [guardians, allSubjects] = await Promise.all([listGuardians(), listSubjects()]);
-    const subjects = allSubjects.filter((subject) => !audience || subject.kind === audience);
+    const guardian = await requireGuardian({ path: '/subjects', audience });
+    const subjects = (await listSubjects(guardian.id)).filter((subject) => !audience || subject.kind === audience);
     const title = audience ? audienceLabel(audience) : 'Pessoas e pets';
 
     return (
@@ -24,7 +28,11 @@ export default async function SubjectsPage({
                 <section className="panel">
                     <h2>Cadastrados</h2>
                     {subjects.length === 0 ? (
-                        <p className="empty">{audience ? `Nenhum cadastro de ${title.toLocaleLowerCase('pt-BR')} ainda.` : 'Nenhuma pessoa ou pet ainda.'}</p>
+                        <p className="empty">
+                            {audience
+                                ? `Nenhum cadastro de ${title.toLocaleLowerCase('pt-BR')} ainda.`
+                                : 'Nenhuma pessoa ou pet ainda.'}
+                        </p>
                     ) : (
                         <div className="table-wrap">
                             <table>
@@ -33,6 +41,7 @@ export default async function SubjectsPage({
                                         <th>Nome</th>
                                         <th>Tipo</th>
                                         <th>Responsável</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -44,6 +53,12 @@ export default async function SubjectsPage({
                                             </td>
                                             <td>{subjectKindLabel(subject.kind)}</td>
                                             <td>{subject.guardianName}</td>
+                                            <td>
+                                                <div className="row-actions">
+                                                    <Link href={vaccinePath({ subjectId: subject.id, audience })}>Nova vacina</Link>
+                                                    <DeleteSubjectButton subjectId={subject.id} />
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -53,16 +68,15 @@ export default async function SubjectsPage({
                 </section>
                 <section className="panel">
                     <h2>Novo cadastro</h2>
-                    {guardians.length === 0 ? (
-                        <p className="empty">Cadastre um responsável antes.</p>
-                    ) : (
-                        <SubjectForm
-                            audience={audience}
-                            guardians={guardians.map((guardian) => ({ id: guardian.id, name: guardian.name }))}
-                        />
-                    )}
+                    <SubjectForm audience={audience} />
                 </section>
             </div>
         </main>
     );
+}
+
+function vaccinePath({ subjectId, audience }: { subjectId: string; audience: SubjectKind | null }): string {
+    const path = withAudience({ path: '/items', audience });
+    const joiner = path.includes('?') ? '&' : '?';
+    return `${path}${joiner}subject=${subjectId}`;
 }

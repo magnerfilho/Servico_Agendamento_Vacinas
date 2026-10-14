@@ -8,37 +8,13 @@ import { FormNotice } from '@/components/form-notice';
 import { SubmitButton } from '@/components/submit-button';
 import type { SubjectKind } from '@/lib/constants';
 
-interface GuardianOption {
-    id: string;
-    name: string;
-}
-
-export function SubjectForm({
-    guardians,
-    audience,
-}: {
-    guardians: GuardianOption[];
-    audience: SubjectKind | null;
-}): ReactElement {
+export function SubjectForm({ audience }: { audience: SubjectKind | null }): ReactElement {
     const [state, action] = useActionState(createSubject, emptyFormState);
     const [kind, setKind] = useState<SubjectKind>(audience ?? 'person');
 
     return (
         <form key={state.savedAt ?? 'new'} action={action}>
             <FormNotice state={state} />
-            <label>
-                Responsável
-                <select name="guardianId" required defaultValue="">
-                    <option value="" disabled>
-                        Escolha
-                    </option>
-                    {guardians.map((guardian) => (
-                        <option key={guardian.id} value={guardian.id}>
-                            {guardian.name}
-                        </option>
-                    ))}
-                </select>
-            </label>
             {audience ? (
                 <input type="hidden" name="kind" value={audience} />
             ) : (
